@@ -3,6 +3,14 @@ DROP TABLE IF EXISTS Utilizador;
 DROP TABLE IF EXISTS Administrador;
 DROP TABLE IF EXISTS Carrinho;
 DROP TABLE IF EXISTS Produto;
+DROP TABLE IF EXISTS Rating;
+DROP TABLE IF EXISTS Encomenda;
+DROP TABLE IF EXISTS ProdutoEncomenda;
+DROP TABLE IF EXISTS ProdutoCarrinho;
+DROP TABLE IF EXISTS Fatura;
+DROP TABLE IF EXISTS Pagamento;
+DROP TABLE IF EXISTS PayPal;
+DROP TABLE IF EXISTS CartaodeCredito;
 
 CREATE TABLE Visitante (
     endereco_IP NUMBER PRIMARY KEY,
@@ -48,4 +56,60 @@ CREATE TABLE Produto (
     img,
     preco FLOAT(4,2) CHECK(preco>0),
     rating INtEGER CHECK(rating >= 0 AND rating <= 5)
+);
+
+CREATE TABLE Rating (
+    id_rating INTEGER AUTOINCREMENT,
+    id_utilizador INTEGER REFERENCES Utilizador(id_utilizador),
+    id_produto INTEGER REFERENCES Produto(id_produto),
+    PRIMARY KEY (id_rating, id_utilizador, id_produto)
+);
+
+CREATE TABLE Encomenda (
+    id_encomenda INTEGER AUTOINCREMENT,
+    portes,
+    estado,
+    data_envio,
+    data_entrega,
+    id_fatura INTEGER REFERENCES Fatura(id_fatura)
+);
+
+CREATE TABLE ProdutoEncomenda (
+    id_encomenda,
+    id_produto,
+    quantidade,
+    PRIMARY KEY (id_encomenda, id_produto)
+);
+
+CREATE TABLE ProdutoCarrinho (
+    id_produto,
+    id_carrinho
+);
+
+CREATE TABLE Fatura (
+    id_fatura,
+    pagamento,
+    total,
+    data,
+    id_utilizador,
+    PRIMARY KEY (id_fatura, id_utilizador)
+);
+
+CREATE TABLE Pagamento (
+    id_pagamento INTEGER PRIMARY KEY AUTOINCREMENT,
+    tipo_de_pagamento,
+    atual BOOLEAN
+);
+
+--check how to do disjointed class
+CREATE TABLE PayPal (
+    nome
+);
+
+CREATE TABLE CartaodeCredito (
+    tipo,
+    data_validade,
+    numero,
+    iban,
+    cod
 );
