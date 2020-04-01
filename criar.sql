@@ -52,56 +52,59 @@ CREATE TABLE Produto (
     categoria CHAR(30),
     nome CHAR(30),
     descricao VARCHAR(65535),
-    stock INtEGER,
-    img,
-    preco FLOAT(4,2) CHECK(preco>0),
-    rating INtEGER CHECK(rating >= 0 AND rating <= 5)
+    stock INTEGER,
+    img IMAGE, 
+    preco FLOAT(6,2) CHECK(preco>0),
+    rating FLOAT(2,1) --CHECK(rating >= 0 AND rating <= 5)
 );
 
 CREATE TABLE Rating (
-    id_rating INTEGER AUTOINCREMENT,
+    -- id_rating INTEGER AUTOINCREMENT,
+    valor INTEGER CHECK (valor >= 0 AND valor <= 5),
     id_utilizador INTEGER REFERENCES Utilizador(id_utilizador),
     id_produto INTEGER REFERENCES Produto(id_produto),
-    PRIMARY KEY (id_rating, id_utilizador, id_produto)
+    PRIMARY KEY (id_utilizador, id_produto)
 );
 
 CREATE TABLE Encomenda (
     id_encomenda INTEGER AUTOINCREMENT,
-    portes,
-    estado,
-    data_envio,
-    data_entrega,
-    id_fatura INTEGER REFERENCES Fatura(id_fatura)
+    portes FLOAT(5,2),
+    estado DATETIME, --talvez?
+    data_envio DATE,
+    data_entrega DATE,
+    CHECK (data_envio < data_entrega),
+    id_fatura INTEGER REFERENCES Fatura(id_fatura),
+    PRIMARY KEY (id_encomenda, id_fatura)
 );
 
 CREATE TABLE ProdutoEncomenda (
-    id_encomenda,
-    id_produto,
-    quantidade,
+    id_encomenda INTEGER REFERENCES Encomenda(id_encomenda),
+    id_produto INTEGER REFERENCES Produto(id_produto),
+    quantidade INTEGER,
     PRIMARY KEY (id_encomenda, id_produto)
 );
 
 CREATE TABLE ProdutoCarrinho (
-    id_produto,
-    id_carrinho
+    id_produto INTEGER REFERENCES Produto(id_produto),
+    id_carrinho INTEGER REFERENCES Carrinho(id_carrinho),
+    PRIMARY KEY (id_produto, id_carrinho)
 );
 
 CREATE TABLE Fatura (
-    id_fatura,
-    pagamento,
-    total,
-    data,
-    id_utilizador,
+    id_fatura INTEGER AUTOINCREMENT,
+    pagamento CHAR(20), --talvez?
+    total FLOAT(10,2),
+    data_emissao DATE,
+    id_utilizador INTEGER REFERENCES Utilizador(id_utilizador),
     PRIMARY KEY (id_fatura, id_utilizador)
 );
 
 CREATE TABLE Pagamento (
     id_pagamento INTEGER PRIMARY KEY AUTOINCREMENT,
-    tipo_de_pagamento,
+    tipo_de_pagamento, --check how to do disjointed classes
     atual BOOLEAN
 );
 
---check how to do disjointed class
 CREATE TABLE PayPal (
     nome
 );
