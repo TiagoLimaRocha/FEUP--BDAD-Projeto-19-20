@@ -101,15 +101,17 @@ CREATE TABLE Fatura (
 
 CREATE TABLE Pagamento (
     id_pagamento INTEGER PRIMARY KEY AUTOINCREMENT,
-    tipo_de_pagamento, --check how to do disjointed classes
+    tipo_de_pagamento, 
     atual BOOLEAN
 );
 
 CREATE TABLE PayPal (
+    id_pagamento INTEGER REFERENCES Pagamento(id_pagamento),
     nome
 );
 
 CREATE TABLE CartaodeCredito (
+    id_pagamento INTEGER REFERENCES Pagamento(id_pagamento),
     tipo,
     data_validade,
     numero,
