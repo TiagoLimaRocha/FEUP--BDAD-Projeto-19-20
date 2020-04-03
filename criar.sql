@@ -69,7 +69,7 @@ CREATE TABLE Rating (
 CREATE TABLE Encomenda (
     id_encomenda INTEGER AUTOINCREMENT,
     portes FLOAT(5,2),
-    estado DATETIME, --talvez?
+    estado INTEGER CHECK (estado > 0 AND estado <= 5), 
     data_envio DATE,
     data_entrega DATE,
     CHECK (data_envio < data_entrega),
@@ -101,20 +101,20 @@ CREATE TABLE Fatura (
 
 CREATE TABLE Pagamento (
     id_pagamento INTEGER PRIMARY KEY AUTOINCREMENT,
-    tipo_de_pagamento, 
+    --tipo_de_pagamento, 
     atual BOOLEAN
 );
 
 CREATE TABLE PayPal (
     id_pagamento INTEGER REFERENCES Pagamento(id_pagamento),
-    nome
+    nome CHAR(30)
 );
 
 CREATE TABLE CartaodeCredito (
     id_pagamento INTEGER REFERENCES Pagamento(id_pagamento),
-    tipo,
-    data_validade,
-    numero,
-    iban,
-    cod
+    tipo CHAR(30),
+    data_validade DATE,
+    numero BIGINT,
+    iban BIGINT,
+    cod INTEGER
 );
