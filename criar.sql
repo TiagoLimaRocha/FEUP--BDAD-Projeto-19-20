@@ -20,7 +20,7 @@ CREATE TABLE Visitante (
 );
 
 CREATE TABLE Utilizador (
-    id_utilizador INTEGER AUTOINCREMENT,
+    id_utilizador INTEGER,
     username CHAR(30) NOT NULL,
     password VARCHAR(255) NOT NULL,
     email TEXT, 
@@ -28,7 +28,7 @@ CREATE TABLE Utilizador (
     sobrenome CHAR(15),
     nif INTEGER,
     morada VARCHAR(255) UNIQUE,
-    cod_postal,
+    cod_postal CHAR(10),
     data_nasc DATE,
     genero CHAR(20),
     endereco_IP NUMBER REFERENCES Visitante(endereco_IP),
@@ -40,7 +40,7 @@ CREATE TABLE Administrador (
 );
 
 CREATE TABLE Carrinho (
-    id_carrinho INTEGER AUTOINCREMENT,
+    id_carrinho INTEGER,
     data_inicio DATE,
     data_fim DATE,
     id_utilizador INTEGER REFERENCES Utilizador(id_utilizador),
@@ -48,7 +48,7 @@ CREATE TABLE Carrinho (
 );
 
 CREATE TABLE Produto (
-    id_produto INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_produto INTEGER PRIMARY KEY,
     categoria CHAR(30),
     nome CHAR(30),
     descricao VARCHAR(65535),
@@ -66,13 +66,21 @@ CREATE TABLE Rating (
     PRIMARY KEY (id_utilizador, id_produto)
 );
 
+CREATE TABLE Fatura (
+    id_fatura INTEGER,
+    pagamento CHAR(20),
+    total FLOAT(10,2),
+    data_emissao DATE,
+    id_utilizador INTEGER REFERENCES Utilizador(id_utilizador),
+    PRIMARY KEY (id_fatura, id_utilizador)
+);
+
 CREATE TABLE Encomenda (
-    id_encomenda INTEGER AUTOINCREMENT,
+    id_encomenda INTEGER,
     portes FLOAT(5,2),
     estado INTEGER CHECK (estado > 0 AND estado <= 5), 
     data_envio DATE,
-    data_entrega DATE,
-    CHECK (data_envio < data_entrega),
+    data_entrega DATE CHECK (data_envio < data_entrega),
     id_fatura INTEGER REFERENCES Fatura(id_fatura),
     PRIMARY KEY (id_encomenda, id_fatura)
 );
@@ -90,17 +98,8 @@ CREATE TABLE ProdutoCarrinho (
     PRIMARY KEY (id_produto, id_carrinho)
 );
 
-CREATE TABLE Fatura (
-    id_fatura INTEGER AUTOINCREMENT,
-    pagamento CHAR(20), --talvez?
-    total FLOAT(10,2),
-    data_emissao DATE,
-    id_utilizador INTEGER REFERENCES Utilizador(id_utilizador),
-    PRIMARY KEY (id_fatura, id_utilizador)
-);
-
 CREATE TABLE Pagamento (
-    id_pagamento INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_pagamento INTEGER PRIMARY KEY,
     --tipo_de_pagamento, 
     atual BOOLEAN
 );
