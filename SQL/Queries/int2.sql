@@ -1,7 +1,25 @@
+
+/*
+ * Selecionar o valor de todas as compras efetuada no dia atual por um determinado 
+ * utilizador e o seu respetivo nome, morada e email
+ */
+
 .mode columns
 .headers on
 .nullvalue NULL
 
---Qual o total gasto por cada utilizador na plataforma?
-
-SELECT Utilizador.username, Fatura.total AS TotalGasto FROM Utilizador,Fatura WHERE Utilizador.id_utilizador=Fatura.id_utilizador;
+SELECT 
+	total,
+	nome_proprio,
+	sobrenome,
+	morada,
+	email
+FROM
+	Fatura
+	INNER JOIN
+		Utilizador
+	ON
+		Utilizador.id_utilizador = Fatura.id_utilizador
+WHERE
+	data_emissao = CURRENT_DATE;
+	

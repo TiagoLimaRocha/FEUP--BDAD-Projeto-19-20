@@ -72,40 +72,31 @@ INSERT INTO Visitante SELECT * FROM FOR;
 
 -- @Utilizador 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(1, "user_1", "!pwd1", "email1@example.com", "first name 1", "last name 1", 111111111, 
-								 "address 1", "1111-111", "1999-12-20", 1, 254122341);
+	VALUES(1, "user_1", "!pwd1", "email1@example.com", "first name 1", "last name 1", 111111111, "address 1", "1111-111", "1999-12-20", 1, 254122341);
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(1, "user_2", "!pwd2", "email1@example.com", "first name 1", "last name 1", 222222222, 
-								 "address 2", "1111-111", "1999-12-20", 0, 254122342);
+	VALUES(1, "user_2", "!pwd2", "email2@example.com", "first name 2", "last name 2", 222222222, "address 2", "1111-111", "1999-12-20", 0, 254122342);
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(1, "user_3", "!pwd3", "email1@example.com", "first name 2", "last name 1", 333333333, 
-								 "address 3", "1111-111", "1999-12-20", 1, 254122343);								 
+	VALUES(1, "user_3", "!pwd3", "email3@example.com", "first name 3", "last name 3", 333333333, "address 3", "1111-111", "1999-12-20", 1, 254122343);								 
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(2, "user_4", "!pwd4", "email1@example.com", "first name 3", "last name 1", 444444444, 
-								 "address 4", "1111-111", "1999-12-20", 0, 254122344);	
+	VALUES(2, "user_4", "!pwd4", "email4@example.com", "first name 4", "last name 4", 444444444, "address 4", "1111-111", "1999-12-20", 0, 254122344);	
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(2, "user_5", "!pwd5", "email1@example.com", "first name 4", "last name 1", 555555555, 
-								 "address 5", "1111-111", "1999-12-20", 0, 254122345);
+	VALUES(2, "user_5", "!pwd5", "email5@example.com", "first name 5", "last name 5", 555555555, "address 5", "1111-111", "1999-12-20", 0, 254122345);
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(2, "user_6", "!pwd6", "email1@example.com", "first name 5", "last name 1", 666666666, 
-								 "address 6", "1111-111", "1999-12-20", 1, 254122346);
+	VALUES(2, "user_6", "!pwd6", "email6@example.com", "first name 6", "last name 6", 666666666, "address 6", "1111-111", "1999-12-20", 1, 254122346);
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(2, "user_7", "!pwd7", "email1@example.com", "first name 6", "last name 1", 777777777, 
-								 "address 7", "1111-111", "1999-12-20", 1, 254122347);
+	VALUES(2, "user_7", "!pwd7", "email7@example.com", "first name 7", "last name 7", 777777777, "address 7", "1111-111", "1999-12-20", 1, 254122347);
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(2, "user_8", "!pwd8", "email1@example.com", "first name 7", "last name 1", 888888888, 
-								 "address 8", "1111-111", "1999-12-20", 1, 254122348);
+	VALUES(2, "user_8", "!pwd8", "email8@example.com", "first name 8", "last name 8", 888888888, "address 8", "1111-111", "1999-12-20", 1, 254122348);
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(2, "user_9", "!pwd9", "email1@example.com", "first name 8", "last name 1", 999999999, 
-								 "address 9", "1111-111", "1999-12-20", 0, 254122349);								 
+	VALUES(2, "user_9", "!pwd9", "email9@example.com", "first name 9", "last name 9", 999999999, "address 9", "1111-111", "1999-12-20", 0, 254122349);								 
 
 
 -- @Administrador
@@ -675,6 +666,7 @@ INSERT INTO ProdutoCarrinho(id_carrinho, id_produto, quantidade)
 		
 		
 -- @Fatura
+-- Current Day
 INSERT INTO Fatura(total, data_emissao, id_utilizador) 
 	VALUES((SELECT SUM(preco) 
 				FROM Produto 
@@ -701,6 +693,111 @@ INSERT INTO Fatura(total, data_emissao, id_utilizador)
 		   CURRENT_DATE,
 		   3);
 
+-- Last Week
+INSERT INTO Fatura(total, data_emissao, id_utilizador) 
+	VALUES((SELECT SUM(preco) 
+				FROM Produto 
+					WHERE id_produto = 3236 
+						OR id_produto = 1234 
+						OR id_produto = 2292), 
+		   "2020-05-21", 
+		   9);
+		   
+INSERT INTO Fatura(total, data_emissao, id_utilizador) 
+	VALUES((SELECT SUM(preco) 
+				FROM Produto 
+					WHERE id_produto = 3250 
+						OR id_produto = 4264 
+						OR id_produto = 5288
+						OR id_produto = 5289), 
+		   "2020-05-21",
+		   4);
+		   
+INSERT INTO Fatura(total, data_emissao, id_utilizador) 
+	VALUES((SELECT preco FROM Produto WHERE id_produto = 6331)*10 
+			+
+		   (SELECT preco FROM Produto WHERE id_produto = 6332)*50, 
+		   "2020-05-20",
+		   7);
+		  
+INSERT INTO Fatura(total, data_emissao, id_utilizador) 
+	VALUES((SELECT SUM(preco) 
+				FROM Produto 
+					WHERE id_produto = 4278 
+						OR id_produto = 5234 
+						OR id_produto = 5239), 
+		   "2020-05-21", 
+		   1);
+		   
+INSERT INTO Fatura(total, data_emissao, id_utilizador) 
+	VALUES((SELECT SUM(preco) 
+				FROM Produto 
+					WHERE id_produto = 6287 
+						OR id_produto = 6286 
+						OR id_produto = 6305
+						OR id_produto = 6319), 
+		   "2020-05-19",
+		   8);
+		   
+INSERT INTO Fatura(total, data_emissao, id_utilizador) 
+	VALUES((SELECT preco FROM Produto WHERE id_produto = 7327)*23 
+			+
+		   (SELECT preco FROM Produto WHERE id_produto = 7329)*35, 
+		   "2020-05-19",
+		   2);
+
+-- Last Month
+INSERT INTO Fatura(total, data_emissao, id_utilizador) 
+	VALUES((SELECT SUM(preco) 
+				FROM Produto 
+					WHERE id_produto = 4330 
+						OR id_produto = 3274 
+						OR id_produto = 2285), 
+		   "2020-04-19", 
+		   7);
+		   
+INSERT INTO Fatura(total, data_emissao, id_utilizador) 
+	VALUES((SELECT SUM(preco) 
+				FROM Produto 
+					WHERE id_produto = 2286 
+						OR id_produto = 2287 
+						OR id_produto = 2301
+						OR id_produto = 2302), 
+		   "2020-04-03",
+		   8);
+		   
+INSERT INTO Fatura(total, data_emissao, id_utilizador) 
+	VALUES((SELECT preco FROM Produto WHERE id_produto = 6331)*2 
+			+
+		   (SELECT preco FROM Produto WHERE id_produto = 6332)*3, 
+		   CURRENT_DATE,
+		   9);
+		  
+INSERT INTO Fatura(total, data_emissao, id_utilizador) 
+	VALUES((SELECT SUM(preco) 
+				FROM Produto 
+					WHERE id_produto = 3236 
+						OR id_produto = 3286 
+						OR id_produto = 3283), 
+		   "2020-04-05", 
+		   1);
+		   
+INSERT INTO Fatura(total, data_emissao, id_utilizador) 
+	VALUES((SELECT SUM(preco) 
+				FROM Produto 
+					WHERE id_produto = 3250 
+						OR id_produto = 4264 
+						OR id_produto = 5288
+						OR id_produto = 5289), 
+		   "2020-04-10",
+		   2);
+		   
+INSERT INTO Fatura(total, data_emissao, id_utilizador) 
+	VALUES((SELECT preco FROM Produto WHERE id_produto = 6331)*2 
+			+
+		   (SELECT preco FROM Produto WHERE id_produto = 6332)*3, 
+		   "2020-04-25",
+		   3);
 
 -- @Encomenda
 INSERT INTO 
@@ -751,7 +848,199 @@ INSERT INTO
 		3
 	);
 
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES (
+		0, 
+		1, 
+		"2020-05-21", 
+		DATE("2020-05-21", "+15 days"), 
+		4
+	);
+	
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES (
+		0, 
+		1, 
+		"2020-05-21", 
+		DATE("2020-05-21", "+15 days"), 
+		5
+	);
+	
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES (
+		0, 
+		1, 
+		"2020-05-20", 
+		DATE("2020-05-20", "+15 days"), 
+		6
+	);
+	
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES (
+		0, 
+		1, 
+		"2020-05-21", 
+		DATE("2020-05-21", "+15 days"), 
+		7
+	);
 
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES (
+		0, 
+		1, 
+		"2020-05-19", 
+		DATE("2020-05-19", "+15 days"), 
+		8
+	);
+
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES (
+		0, 
+		1, 
+		"2020-05-19", 
+		DATE("2020-05-19", "+15 days"), 
+		9
+	);
+	
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES (
+		0, 
+		1, 
+		"2020-04-19", 
+		DATE("2020-04-19", "+15 days"), 
+		10
+	);
+	
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES (
+		0, 
+		1, 
+		"2020-04-03", 
+		DATE("2020-04-03", "+15 days"), 
+		11
+	);	
+	
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES (
+		0, 
+		1, 
+		"2020-05-24", 
+		DATE("2020-05-24", "+15 days"), 
+		12
+	);
+	
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES (
+		0, 
+		1, 
+		"2020-04-05", 
+		DATE("2020-04-05", "+15 days"), 
+		13
+	);	
+	
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES (
+		0, 
+		1, 
+		"2020-04-10", 
+		DATE("2020-04-10", "+15 days"), 
+		14
+	);	
+	
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES (
+		0, 
+		1, 
+		"2020-04-25", 
+		DATE("2020-04-25", "+15 days"), 
+		15
+	);	
+	
+	
 -- @ProdutoEncomenda
 INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade) 
 	VALUES
@@ -771,3 +1060,76 @@ INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade)
 		(3, 6331, 2),
 		(3, 6332, 3);
 		
+INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade) 
+	VALUES
+		(4, 3236, 1),
+		(4, 1234, 1),
+		(4, 2292, 1);
+		
+INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade) 
+	VALUES
+		(5, 3250, 1),
+		(5, 4264, 1),
+		(5, 5288, 1),
+		(5, 5289, 1);
+		
+INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade) 
+	VALUES
+		(6, 6331, 10),
+		(6, 6332, 50);	
+		
+		
+INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade) 
+	VALUES
+		(7, 4278, 1),
+		(7, 5234, 1),
+		(7, 5239, 1);
+		
+INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade) 
+	VALUES
+		(8, 6287, 1),
+		(8, 6286, 1),
+		(8, 6305, 1),
+		(8, 6319, 1);
+		
+INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade) 
+	VALUES
+		(9, 7327, 23),
+		(9, 7329, 35);		   	   
+		   
+INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade) 
+	VALUES
+		(10, 4330, 1),
+		(10, 3274, 1),
+		(10, 2285, 1);
+		
+INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade) 
+	VALUES
+		(11, 2286, 1),
+		(11, 2287, 1),
+		(11, 2301, 1),
+		(11, 2302, 1);
+		
+INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade) 
+	VALUES
+		(12, 6331, 2),
+		(12, 6332, 3);			   
+
+INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade) 
+	VALUES
+		(13, 3236, 1),
+		(13, 3286, 1),
+		(13, 3283, 1);
+		
+INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade) 
+	VALUES
+		(14, 3250, 1),
+		(14, 4264, 1),
+		(14, 5288, 1),
+		(14, 5289, 1);
+		
+INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade) 
+	VALUES
+		(15, 6331, 2),
+		(15, 6332, 3);			   
+		   

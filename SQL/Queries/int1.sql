@@ -1,7 +1,10 @@
+/* 
+ * Selecionar todos os produtos (e toda a informação a eles referente) de uma 
+ * dada categoria (i.e. "Fotografia, Video, Lab Foto")
+ */
+ 
 .mode columns
 .headers on
 .nullvalue NULL
 
---Qual o nome de cada utilizador?
-
-SELECT DISTINCT nome_proprio,sobrenome FROM Utilizador;
+SELECT * FROM Produto WHERE Categoria = "Fotografia, Video, Lab Foto";
