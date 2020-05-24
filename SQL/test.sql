@@ -1,21 +1,380 @@
-PRAGMA	foreign_keys = ON;
+PRAGMA foreign_keys = OF;
+
+BEGIN TRANSACTION;
+
+-- @CLASSES
+
+-- VISITANTE
+DROP TABLE IF EXISTS Visitante;
+CREATE TABLE Visitante (
+    endereco_IP VARCHAR(255) PRIMARY KEY,
+    localizacao VARCHAR(255),
+    data_entrada DATETIME,
+    tempo_visita INT CHECK(tempo_visita > 0)
+);
+
+-- UTILIZADOR
+DROP TABLE IF EXISTS Utilizador;
+CREATE TABLE Utilizador (
+    id_utilizador INTEGER PRIMARY KEY AUTOINCREMENT,
+	estado TINYINT CHECK (estado > 0 AND estado < 3),
+    username VARCHAR(255), 
+    password VARCHAR(255), 
+    email VARCHAR(255), 
+	nome_proprio VARCHAR(255),
+    sobrenome VARCHAR(255),
+    nif INT,
+    morada VARCHAR(255) UNIQUE,
+    cod_postal CHAR(10) CHECK (LENGTH(cod_postal) = 8),
+    data_nasc DATE,
+    genero BOOLEAN CHECK (genero = 0 OR genero = 1),
+	endereco_IP INT,
+    FOREIGN KEY (endereco_IP) REFERENCES Visitante(endereco_IP)
+);
+
+-- ADMINISTRADOR
+DROP TABLE IF EXISTS Administrador;
+CREATE TABLE Administrador (
+	id_utilizador INTEGER,
+    FOREIGN KEY (id_utilizador) REFERENCES Utilizador(id_utilizador),
+	PRIMARY KEY (id_utilizador)
+);
+
+-- CARRINHO
+DROP TABLE IF EXISTS Carrinho;
+CREATE TABLE Carrinho (
+    id_carrinho INTEGER PRIMARY KEY AUTOINCREMENT,
+	id_utilizador INTEGER,
+    data_inicio DATE,
+    data_fim DATE,
+	atual BOOLEAN,
+    FOREIGN KEY (id_utilizador) REFERENCES Utilizador(id_utilizador)
+);
+
+-- PRODUTO
+DROP TABLE IF EXISTS Produto;
+CREATE TABLE Produto (
+    id_produto INTEGER NOT NULL PRIMARY KEY,
+    categoria VARCHAR(255),
+    nome VARCHAR(255),
+    descricao TEXT,
+    stock INT,
+    img VARCHAR(255), 
+    preco FLOAT(6,2) CHECK (preco > 0),
+    rating FLOAT(2,1) DEFAULT 0 CHECK (rating >= 0 AND rating <= 5)
+);
+
+-- RATING
+DROP TABLE IF EXISTS Rating;
+CREATE TABLE Rating (
+    id_rating INTEGER PRIMARY KEY AUTOINCREMENT,
+	id_utilizador INTEGER,
+	id_produto INTEGER,
+    valor INT CHECK (valor >= 0 AND valor <= 5),
+    FOREIGN KEY (id_utilizador) REFERENCES Utilizador(id_utilizador),
+    FOREIGN KEY (id_produto) REFERENCES Produto(id_produto)
+);
+
+-- FATURA
+DROP TABLE IF EXISTS Fatura;
+CREATE TABLE Fatura (
+    id_fatura INTEGER PRIMARY KEY AUTOINCREMENT,
+    total FLOAT(10,2),
+    data_emissao DATE,
+	id_utilizador INTEGER,
+    FOREIGN KEY (id_utilizador) REFERENCES Utilizador(id_utilizador)
+);
+
+-- ENCOMENDA
+DROP TABLE IF EXISTS Encomenda;
+CREATE TABLE Encomenda (
+    id_encomenda INTEGER PRIMARY KEY AUTOINCREMENT,
+    portes FLOAT(5,2),
+    estado TINYINT CHECK (estado > 0 AND estado <= 5), 
+    data_envio DATE,
+    data_entrega DATE CHECK(data_envio < data_entrega),
+	id_fatura INTEGER,
+    FOREIGN KEY (id_fatura) REFERENCES Fatura(id_fatura)
+);
+
+-- PAGAMENTO
+DROP TABLE IF EXISTS Pagamento; 
+CREATE TABLE Pagamento (
+    id_pagamento INTEGER PRIMARY KEY AUTOINCREMENT,
+	id_utilizador INTEGER,
+    tipo_pagamento VARCHAR(255), 
+    atual BOOLEAN,
+	FOREIGN KEY (id_utilizador) REFERENCES Utilizador(id_utilizador)
+);
+
+-- PAYPAL
+DROP TABLE IF EXISTS PayPal;
+CREATE TABLE PayPal (
+    id_pagamento INTEGER,
+    nome VARCHAR(255),
+	FOREIGN KEY (id_pagamento) REFERENCES Pagamento(id_pagamento),
+	PRIMARY KEY (id_pagamento)
+);
+
+-- CARTAODECREDITO
+DROP TABLE IF EXISTS CartaoDeCredito;
+CREATE TABLE CartaodeCredito (
+	id_pagamento INTEGER,
+    tipo VARCHAR(255),
+    data_validade DATE,
+    numero VARCHAR(255) CHECK (LENGTH(numero) < 20),
+    cod INT CHECK (cod < 1000),
+	FOREIGN KEY (id_pagamento) REFERENCES Pagamento(id_pagamento),
+	PRIMARY KEY (id_pagamento)
+);
+
+
+-- @ASSOCIAÇÕES
+
+-- PRODUTO - ENCOMENDA
+DROP TABLE IF EXISTS ProdutoEncomenda;
+CREATE TABLE ProdutoEncomenda (
+	id_encomenda INTEGER,
+	id_produto INTEGER,
+    quantidade INT,
+    FOREIGN KEY (id_encomenda) REFERENCES Encomenda(id_encomenda),
+    FOREIGN KEY (id_produto) REFERENCES Produto(id_produto),
+    PRIMARY KEY (id_encomenda, id_produto)
+);
+
+-- PRODUTO - CARRINHO
+DROP TABLE IF EXISTS ProdutoCarrinho;
+CREATE TABLE ProdutoCarrinho (
+    id_produto INTEGER,
+	id_carrinho INTEGER,
+	quantidade INT,
+	FOREIGN KEY (id_produto) REFERENCES Produto(id_produto),
+    FOREIGN KEY (id_carrinho) REFERENCES Carrinho(id_carrinho),
+    PRIMARY KEY (id_produto, id_carrinho)
+);
+
+
+-- @LOGS
+
+-- UTILIZADOR LOGS
+DROP TABLE IF EXISTS UtilizadorLogs;
+CREATE TABLE UtilizadorLogs (
+	id_utilizador_logs INTEGER PRIMARY KEY,
+	old_id_utilizador INT,
+	new_id_utilizador INT,
+	old_email VARCHAR(255),
+	new_email VARCHAR(255),
+	old_username VARCHAR(255),
+	new_username VARCHAR(255),
+	old_password VARCHAR(255),
+	new_password VARCHAR(255),
+	old_nome_proprio VARCHAR(255),
+	new_nome_proprio VARCHAR(255),
+    old_sobrenome VARCHAR(255),
+	new_sobrenome VARCHAR(255),
+    old_nif INT,
+	new_nif INT,
+    old_morada VARCHAR(255) UNIQUE,
+	new_morada VARCHAR(255) UNIQUE,
+    old_cod_postal CHAR(10) CHECK (LENGTH(old_cod_postal) = 8),
+	new_cod_postal CHAR(10) CHECK (LENGTH(new_cod_postal) = 8)
+);
+
+-- PRODUTO - CARRINHO LOGS
+DROP TABLE IF EXISTS ProdutoCarrinhoLogs;
+CREATE TABLE ProdutoCarrinhoLogs (
+	id_carrinho_logs INTEGER PRIMARY KEY,
+	old_id_produto INT,
+	old_id_carrinho INT,
+	old_quantidade INT,
+	data_remocao DATETIME
+);
+
+COMMIT TRANSACTION;
+
+
 
 -- @Carrinho
 DROP TRIGGER IF EXISTS carregar_carrinho_apos_update;
 CREATE TRIGGER IF NOT EXISTS carregar_carrinho_apos_update 
    AFTER UPDATE OF estado ON Utilizador 
-   WHEN NEW.estado = 1
+   WHEN NEW.estado = 1 
 BEGIN
-	INSERT INTO Carrinho(id_utilizador, data_inicio) VALUES (OLD.id_utilizador, CURRENT_TIMESTAMP);
+	INSERT INTO 
+		Carrinho(id_utilizador, atual, data_inicio, data_fim) 
+	VALUES 
+		(NEW.id_utilizador, 1, CURRENT_TIMESTAMP, NULL);
 END;
 
+
+
+
+-- @Carrinho
 DROP TRIGGER IF EXISTS carregar_carrinho_apos_insert;
 CREATE TRIGGER IF NOT EXISTS carregar_carrinho_apos_insert 
    AFTER INSERT ON Utilizador 
    WHEN NEW.estado = 1
 BEGIN
-	INSERT INTO Carrinho(id_utilizador, data_inicio) VALUES (NEW.id_utilizador, CURRENT_TIMESTAMP);
+	INSERT INTO 
+		Carrinho(id_utilizador, data_inicio, data_fim) 
+	VALUES 
+		(NEW.id_utilizador, CURRENT_TIMESTAMP, NULL);
 END;
+
+
+
+-- @LOGS
+
+/*
+ * Como ambas estas tabelas contêm informação sensível que não pode ser perdida, 
+ * e por fins de utilizade mas também para comparações estatísticas e como medida métrica,  
+ * é importante armazenar esta informação em tabelas separadas `logs`, para isso usamos estes dois triggers.
+ * No caso da tabela Produto-Carrinho é interessante saber quais os produtos que os utilizadores decidiram remover do carrinho
+ */
+
+-- UTILIZADOR LOGS
+DROP TRIGGER IF EXISTS log_utilizador_apos_update;
+CREATE TRIGGER IF NOT EXISTS log_utilizador_apos_update 
+	AFTER UPDATE ON Utilizador
+		WHEN OLD.email <> NEW.email
+			OR OLD.username <> NEW.username
+			OR OLD.password <> NEW.password
+			OR OLD.nome_proprio <> NEW.nome_proprio
+			OR OLD.sobrenome <> NEW.sobrenome
+			OR OLD.nif <> NEW.nif
+			OR OLD.morada <> NEW.morada
+			OR OLD.cod_postal <> NEW.cod_postal
+BEGIN
+	INSERT INTO 
+	    UtilizadorLogs (
+    		old_id_utilizador,
+    		new_id_utilizador,
+    		old_email,
+    		new_email,
+    		old_username,
+    		new_username,
+    		old_password,
+    		new_password,
+    		old_nome_proprio,
+    		new_nome_proprio,
+    		old_sobrenome,
+    		new_sobrenome,
+    		old_nif,
+    		new_nif,
+    		old_morada,
+    		new_morada,
+    		old_cod_postal,
+    		new_cod_postal
+    	) 
+    	VALUES (
+    		OLD.id_utilizador,
+    		NEW.id_utilizador,
+    		OLD.email,
+    		NEW.email,
+    		OLD.username,
+    		NEW.username,
+    		OLD.password,
+    		NEW.password,
+    		OLD.nome_proprio,
+    		NEW.nome_proprio,
+    		OLD.sobrenome,
+    		NEW.sobrenome,
+    		OLD.nif,
+    		NEW.nif,
+    		OLD.morada,
+    		NEW.morada,
+    		OLD.cod_postal,
+    		NEW.cod_postal
+    	);
+END;
+
+	
+	
+	
+	
+-- @FATURA
+
+/*
+ * Atualiza automaticamente o valor total a pagar na fatura sempre que é dada
+ * uma nova entrada na tabela ProdutoEncomenda
+ */
+
+DROP TRIGGER IF EXISTS atualizacao_do_valor_total_da_fatura;
+CREATE TRIGGER IF NOT EXISTS atualizacao_do_valor_total_da_fatura
+	AFTER INSERT ON ProdutoEncomenda
+BEGIN	
+	UPDATE
+		Fatura
+	SET 
+		total = ((SELECT preco FROM Produto WHERE id_produto = NEW.id_produto) * NEW.quantidade 
+					+ 
+				(SELECT total FROM Fatura WHERE id_fatura = (
+				    SELECT id_fatura FROM Encomenda WHERE id_encomenda = NEW.id_encomenda)))
+	WHERE 
+		id_utilizador = (
+			SELECT id_utilizador FROM Fatura WHERE id_fatura = (
+				SELECT id_fatura FROM Encomenda WHERE id_encomenda = (
+					SELECT id_encomenda FROM ProdutoEncomenda WHERE id_encomenda = NEW.id_encomenda AND id_produto = NEW.id_produto)));
+END;
+
+
+
+
+-- @ProdutoCarrinho
+DROP TRIGGER IF EXISTS check_quantidade;
+CREATE TRIGGER IF NOT EXISTS check_quantidade 
+   BEFORE INSERT ON ProdutoCarrinho 
+BEGIN
+   SELECT
+      CASE
+		WHEN NEW.quantidade > (SELECT stock FROM Produto WHERE id_produto = NEW.id_produto)
+			THEN RAISE (ABORT,'ERRO: quantidade maior que o stock!')
+      END;
+END;
+
+
+
+-- UTILIZADOR
+DROP TRIGGER IF EXISTS utilizador_validar_email;
+CREATE TRIGGER utilizador_validar_email 
+   BEFORE INSERT ON Utilizador
+BEGIN
+   SELECT
+      CASE
+		WHEN NEW.email NOT LIKE '%_@__%.__%' 
+			THEN RAISE (ABORT,'Invalid email address!')
+      END;
+END;
+
+
+
+-- @LOGS
+
+-- PRODUTO - CARRINHO LOGS
+DROP TRIGGER IF EXISTS log_produto_carrinho_apos_update;
+CREATE TRIGGER IF NOT EXISTS log_produto_carrinho_apos_update 
+	AFTER DELETE ON ProdutoCarrinhoLogs
+BEGIN
+	INSERT INTO ProdutoCarrinho (
+		old_id_produto,
+		old_id_carrinho,
+		old_quantidade,
+		data_remocao 
+	)
+	VALUES(
+		OLD.id_produto,
+		OLD.id_carrinho,
+		OLD.quantidade,
+		CURRENT_TIMESTAMP
+	);
+END;
+	
+	
+	
+	
+	
+	
+PRAGMA	foreign_keys = ON;
 
 -- @Visitante
 /*
@@ -89,40 +448,31 @@ INSERT INTO Visitante SELECT * FROM FOR;
 
 -- @Utilizador 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(1, "user_1", "!pwd1", "email1@example.com", "first name 1", "last name 1", 111111111, 
-								 "address 1", "1111-111", "1999-12-20", 1, 254122341);
+	VALUES(1, "user_1", "!pwd1", "email1@example.com", "first name 1", "last name 1", 111111111, "address 1", "1111-111", "1999-12-20", 1, 254122341);
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(1, "user_2", "!pwd2", "email1@example.com", "first name 1", "last name 1", 222222222, 
-								 "address 2", "1111-111", "1999-12-20", 0, 254122342);
+	VALUES(1, "user_2", "!pwd2", "email1@example.com", "first name 1", "last name 1", 222222222, "address 2", "1111-111", "1999-12-20", 0, 254122342);
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(1, "user_3", "!pwd3", "email1@example.com", "first name 2", "last name 1", 333333333, 
-								 "address 3", "1111-111", "1999-12-20", 1, 254122343);								 
+	VALUES(1, "user_3", "!pwd3", "email1@example.com", "first name 2", "last name 1", 333333333, "address 3", "1111-111", "1999-12-20", 1, 254122343);								 
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(2, "user_4", "!pwd4", "email1@example.com", "first name 3", "last name 1", 444444444, 
-								 "address 4", "1111-111", "1999-12-20", 0, 254122344);	
+	VALUES(2, "user_4", "!pwd4", "email1@example.com", "first name 3", "last name 1", 444444444, "address 4", "1111-111", "1999-12-20", 0, 254122344);	
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(2, "user_5", "!pwd5", "email1@example.com", "first name 4", "last name 1", 555555555, 
-								 "address 5", "1111-111", "1999-12-20", 0, 254122345);
+	VALUES(2, "user_5", "!pwd5", "email1@example.com", "first name 4", "last name 1", 555555555, "address 5", "1111-111", "1999-12-20", 0, 254122345);
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(2, "user_6", "!pwd6", "email1@example.com", "first name 5", "last name 1", 666666666, 
-								 "address 6", "1111-111", "1999-12-20", 1, 254122346);
+	VALUES(2, "user_6", "!pwd6", "email1@example.com", "first name 5", "last name 1", 666666666, "address 6", "1111-111", "1999-12-20", 1, 254122346);
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(2, "user_7", "!pwd7", "email1@example.com", "first name 6", "last name 1", 777777777, 
-								 "address 7", "1111-111", "1999-12-20", 1, 254122347);
+	VALUES(2, "user_7", "!pwd7", "email1@example.com", "first name 6", "last name 1", 777777777, "address 7", "1111-111", "1999-12-20", 1, 254122347);
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(2, "user_8", "!pwd8", "email1@example.com", "first name 7", "last name 1", 888888888, 
-								 "address 8", "1111-111", "1999-12-20", 1, 254122348);
+	VALUES(2, "user_8", "!pwd8", "email1@example.com", "first name 7", "last name 1", 888888888, "address 8", "1111-111", "1999-12-20", 1, 254122348);
 
 INSERT INTO Utilizador (estado, username, password, email, nome_proprio, sobrenome, nif, morada, cod_postal, data_nasc, genero, endereco_ip) 
-	VALUES(2, "user_9", "!pwd9", "email1@example.com", "first name 8", "last name 1", 999999999, 
-								 "address 9", "1111-111", "1999-12-20", 0, 254122349);								 
+	VALUES(2, "user_9", "!pwd9", "email1@example.com", "first name 8", "last name 1", 999999999, "address 9", "1111-111", "1999-12-20", 0, 254122349);								 
 
 
 -- @Administrador
@@ -191,7 +541,7 @@ INSERT INTO Pagamento(id_utilizador, tipo_pagamento, atual) VALUES (9, "PayPal",
 INSERT INTO PayPal(id_pagamento, nome) VALUES (17, "PayPal Utilizador 9");
 INSERT INTO Pagamento(id_utilizador, tipo_pagamento, atual) VALUES (9, "Cartão de Crédito", 0);
 INSERT INTO CartaoDeCredito(id_pagamento, tipo, data_validade, numero, cod)
-	VALUES (18, "Maestro", "2022-12-12", "9999 9999 9999 9999", 999);
+	VALUES (18, "Maestro", "2022-12-12", "9999 9999 9999 9999", 998);
 
 
 -- @Produto 
@@ -671,16 +1021,6 @@ UPDATE Produto SET rating=(SELECT AVG(valor) FROM Rating WHERE id_produto = 7234
 */
 
 -- @ProdutoCarrinho
-DROP TRIGGER IF EXISTS check_quantidade;
-CREATE TRIGGER IF NOT EXISTS check_quantidade 
-   BEFORE INSERT ON ProdutoCarrinho 
-BEGIN
-   SELECT
-      CASE
-		WHEN NEW.quantidade > (SELECT stock FROM Produto WHERE id_produto = NEW.id_produto)
-			THEN RAISE (ABORT,'ERRO: quantidade maior que o stock!')
-      END;
-END;
 
 INSERT INTO ProdutoCarrinho(id_carrinho, id_produto, quantidade) 
 	VALUES 
@@ -730,9 +1070,53 @@ INSERT INTO Fatura(total, data_emissao, id_utilizador)
 
 
 -- @Encomenda
-INSERT INTO Encomenda(portes, estado, data_envio, data_entrega, id_fatura) VALUES (0, 1, CURRENT_DATE, DATE("now", "+15 days"), 1);
-INSERT INTO Encomenda(portes, estado, data_envio, data_entrega, id_fatura) VALUES (0, 1, CURRENT_DATE, DATE("now", "+15 days"), 2);
-INSERT INTO Encomenda(portes, estado, data_envio, data_entrega, id_fatura) VALUES (0, 1, CURRENT_DATE, DATE("now", "+15 days"), 3);
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES (
+		0, 
+		1, 
+		CURRENT_DATE, 
+		DATE("now", "+15 days"), 
+		1
+	);
+		
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES(
+		0, 
+		1, 
+		CURRENT_DATE, 
+		DATE("now", "+15 days"), 
+		2
+	);
+	
+INSERT INTO 
+	Encomenda(
+		portes, 
+		estado, 
+		data_envio, 
+		data_entrega, 
+		id_fatura
+	) 
+	VALUES(
+		0, 
+		1, 
+		CURRENT_DATE, 
+		DATE("now", "+15 days"), 
+		3
+	);
 
 
 -- @ProdutoEncomenda
@@ -753,4 +1137,4 @@ INSERT INTO ProdutoEncomenda(id_encomenda, id_produto, quantidade)
 	VALUES
 		(3, 6331, 2),
 		(3, 6332, 3);
-		
+			

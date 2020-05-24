@@ -32,61 +32,6 @@ CREATE TABLE Utilizador (
     FOREIGN KEY (endereco_IP) REFERENCES Visitante(endereco_IP)
 );
 
-DROP TRIGGER IF EXISTS utilizador_validar_email;
-CREATE TRIGGER utilizador_validar_email 
-   BEFORE INSERT ON Utilizador
-BEGIN
-   SELECT
-      CASE
-		WHEN NEW.email NOT LIKE '%_@__%.__%' 
-			THEN RAISE (ABORT,'Invalid email address!')
-      END;
-END;
-
-/* 
- * Por defeito o SQLite não providencia uma implementação para o comparador de 
- * expressões regulares REGEXP; isso é feito ao implementar a funcção nativa do SQL regexp(),
- * uma possível implementação em Java seria algo do género: 
-	
-	Function.create(connection, "REGEXP", new Function() {
-	  @Override
-	  protected void xFunc() throws SQLException {
-		String expression = value_text(0);
-		String value = value_text(1);
-		if (value == null)
-		  value = "";
-
-		Pattern pattern=Pattern.compile(expression);
-		result(pattern.matcher(value).find() ? 1 : 0);
-	  }
-	});
-
- * Admitindo que se criou essa implementação poder-se-ia utilizar os seguintes triggers
- * para validar o username e a password de cada utilizador:
- 
-DROP TRIGGER IF EXISTS utilizador_validar_username;
-CREATE TRIGGER utilizador_validar_username 
-   BEFORE INSERT ON Utilizador
-BEGIN
-   SELECT
-      CASE
-		WHEN (SELECT username FROM Utilizador WHERE username REGEXP "^[-\w\.\$@\*\!]{1,30}$") > 0
-			THEN RAISE (ABORT,'Invalid username!')
-      END;
-END;
-
-DROP TRIGGER IF EXISTS utilizador_validar_password;
-CREATE TRIGGER utilizador_validar_password 
-   BEFORE INSERT ON Utilizador
-BEGIN
-   SELECT
-      CASE
-		WHEN (SELECT password FROM Utilizador WHERE password REGEXP "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{16,}$") > 0
-			THEN RAISE (ABORT,'Invalid password!')
-      END;
-END;
-*/
-
 -- ADMINISTRADOR
 DROP TABLE IF EXISTS Administrador;
 CREATE TABLE Administrador (
@@ -101,6 +46,8 @@ CREATE TABLE Carrinho (
     id_carrinho INTEGER PRIMARY KEY AUTOINCREMENT,
 	id_utilizador INTEGER,
     data_inicio DATE,
+	data_fim DATE,
+	atual BOOLEAN,
     FOREIGN KEY (id_utilizador) REFERENCES Utilizador(id_utilizador)
 );
 
@@ -176,7 +123,7 @@ CREATE TABLE CartaodeCredito (
     tipo VARCHAR(255),
     data_validade DATE,
     numero VARCHAR(255) CHECK (LENGTH(numero) < 20),
-    cod INT CHECK (cod < 999),
+    cod INT CHECK (cod < 1000),
 	FOREIGN KEY (id_pagamento) REFERENCES Pagamento(id_pagamento),
 	PRIMARY KEY (id_pagamento)
 );
@@ -206,4 +153,43 @@ CREATE TABLE ProdutoCarrinho (
     PRIMARY KEY (id_produto, id_carrinho)
 );
 
+
+-- @LOGS
+
+-- UTILIZADOR LOGS
+DROP TABLE IF EXISTS UtilizadorLogs;
+CREATE TABLE UtilizadorLogs (
+	id_utilizador_logs INTEGER PRIMARY KEY,
+	old_id_utilizador INT,
+	new_id_utilizador INT,
+	old_email VARCHAR(255),
+	new_email VARCHAR(255),
+	old_username VARCHAR(255),
+	new_username VARCHAR(255),
+	old_password VARCHAR(255),
+	new_password VARCHAR(255),
+	old_nome_proprio VARCHAR(255),
+	new_nome_proprio VARCHAR(255),
+    old_sobrenome VARCHAR(255),
+	new_sobrenome VARCHAR(255),
+    old_nif INT,
+	new_nif INT,
+    old_morada VARCHAR(255) UNIQUE,
+	new_morada VARCHAR(255) UNIQUE,
+    old_cod_postal CHAR(10) CHECK (LENGTH(old_cod_postal) = 8),
+	new_cod_postal CHAR(10) CHECK (LENGTH(new_cod_postal) = 8)
+);
+
+-- PRODUTO - CARRINHO LOGS
+DROP TABLE IF EXISTS ProdutoCarrinhoLogs;
+CREATE TABLE ProdutoCarrinhoLogs (
+	id_carrinho_logs INTEGER PRIMARY KEY,
+	old_id_produto INT,
+	old_id_carrinho INT,
+	old_quantidade INT,
+	data_remocao DATETIME
+);
+
 COMMIT TRANSACTION;
+
+
